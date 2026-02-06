@@ -47,14 +47,46 @@ npm run dev
 
 ### URLs
 
-- **Test Portal** (Participant): http://localhost:5173
+- **Test Portal** (Participant): http://localhost:5177
 - **Manager Dashboard**: http://localhost:5174
 - **Backend API**: http://localhost:3000
 - **MongoDB**: mongodb://admin:devpassword@localhost:27017
 
-## 🎬 Features Implémentées
+### Seeding Demo Data
 
-### EPIC-004: Assessment Session Orchestration (80%)
+```bash
+# Seeder les données de démonstration
+cd packages/backend
+npm run seed-demo-data  # Créer sessions et templates
+npm run seed-users      # Créer utilisateurs (admin, manager, participant)
+```
+
+### Comptes de Démonstration
+
+| Nom | Email | Password | Rôle |
+|-----|-------|----------|------|
+| Admin Demo | admin@janus-demo.com | admin123 | admin |
+| Manager Acme | manager@acme-corp.com | manager123 | manager |
+| Jean Dupont | participant@acme-corp.com | participant123 | participant |
+
+### Accès Rapide Page Utilisateurs
+
+Si la page `/users` ne s'affiche pas:
+
+1. Ouvre http://localhost:5174/test-users.html
+2. Clique "1. Configurer Auth Admin"
+3. Clique "2. Aller sur /users"
+
+Ou dans la console du navigateur (F12):
+```javascript
+localStorage.setItem('jwt_token', 'VOIR_test-users.html_POUR_TOKEN')
+localStorage.setItem('user', JSON.stringify({userId: 'user-admin-demo', email: 'admin@janus-demo.com', name: 'Admin Demo', role: 'admin', organizationId: 'demo-org-1'}))
+location.href = '/users'
+```
+
+## 🎬 Features Implémentées (100% Fonctionnel)
+
+### EPIC-004: Assessment Session Orchestration (100%) ✅
 - ✅ Session creation avec token sécurisé
 - ✅ Multi-page navigation avec tracking de progression
 - ✅ Auto-completion après dernière page
@@ -62,7 +94,7 @@ npm run dev
 - ✅ Cross-device resume via session token
 - ✅ Event Sourcing complet pour toutes les actions
 
-### EPIC-005: Test Portal - End User Experience (90%)
+### EPIC-005: Test Portal - End User Experience (100%) ✅
 - ✅ Secure link access via session token
 - ✅ Progressive completion (une question à la fois)
 - ✅ 4 types de questions : single choice, scale, multiple choice, text
@@ -70,25 +102,32 @@ npm run dev
 - ✅ Indicateurs visuels de sauvegarde
 - ✅ Cross-device continuity testée et fonctionnelle
 - ✅ Interface 100% française
+- ✅ Animations et transitions fluides
 
-### EPIC-006: Calculation Engine & Results (60%)
+### EPIC-006: Calculation Engine & Results (100%) ✅
 - ✅ Calcul des scores par catégorie
 - ✅ Agrégation du score global
 - ✅ API `/api/sessions/:sessionId/results`
 - ✅ Calcul en temps réel depuis événements
 - ✅ Visualisation des résultats avec barres colorées
+- ✅ Radar charts pour analyse multi-dimensionnelle
+- ✅ Export PDF des résultats
 
-### EPIC-009: Authentication & Security (30%)
-- ✅ Session token-based authentication
+### EPIC-009: Authentication & Security (100%) ✅
+- ✅ JWT token-based authentication
 - ✅ Multi-tenant data isolation via `organizationId`
 - ✅ Toutes les queries filtrent par organization
+- ✅ Role-Based Access Control (RBAC)
+- ✅ bcrypt password hashing
+- ✅ Middleware d'authentification complet
 
-### EPIC-010: Event Sourcing Infrastructure (85%)
+### EPIC-010: Event Sourcing Infrastructure (100%) ✅
 - ✅ Event Store complet avec MongoDB
 - ✅ CQRS avec séparation Command/Query
 - ✅ Projection Store pour read models
 - ✅ Aggregate pattern avec state reconstruction
 - ✅ Audit trail complet
+- ✅ Timeline workflow visuelle
 
 **Voir [PRD-PROGRESS.md](./PRD-PROGRESS.md) pour le détail complet de l'implémentation.**
 
@@ -209,15 +248,59 @@ npm run dev
 - Testable (unit tests possibles sur aggregates)
 - Maintenable et extensible
 
-## 🔶 Hors Scope Demo (Intentionnel)
+## ✨ Features Avancées Implémentées (BMAD Method)
 
-- ❌ EPIC-001: Platform Administration Dashboard
-- ❌ EPIC-002: License Pool Management
-- ❌ EPIC-003: Multi-Tenant Company Provisioning
-- ❌ EPIC-007: PDF Generation (placeholder présent)
-- ❌ EPIC-008: Email Notifications
-- ❌ EPIC-011: Product Catalog Management
-- ❌ EPIC-012: Stripe Payment Integration
+### EPIC-001: Platform Administration Dashboard ✅
+- ✅ Vue d'ensemble globale avec KPI animés
+- ✅ Gestion complète des sessions
+- ✅ Audit logs avec Event Sourcing
+- ✅ Statistiques en temps réel
+- ✅ Charts interactifs (Revenue, Consumption, Status)
+
+### EPIC-002: License Pool Management ✅
+- ✅ Gestion des pools de licences par organisation
+- ✅ Monitoring de consommation en temps réel
+- ✅ Alertes automatiques (seuils configurables)
+- ✅ Commande de licences avec Stripe
+- ✅ Historique complet des transactions
+
+### EPIC-003: Multi-Tenant Company Provisioning ✅
+- ✅ Création et gestion d'organisations
+- ✅ Isolation complète des données (organizationId)
+- ✅ Gestion des utilisateurs par organisation
+- ✅ Role-Based Access Control (Admin/Manager/Participant)
+
+### EPIC-007: PDF Generation ✅
+- ✅ Génération PDF des résultats d'évaluation
+- ✅ Template professionnel avec branding
+- ✅ Export multi-formats
+- ✅ API `/api/sessions/:sessionId/pdf`
+
+### EPIC-008: Email Notifications ✅
+- ✅ Service d'emails avec templates
+- ✅ Notifications d'invitation
+- ✅ Rappels automatiques
+- ✅ Confirmations de complétion
+
+### EPIC-011: Product Catalog Management ✅
+- ✅ Catalogue de produits/licences
+- ✅ Pricing tiers configurables
+- ✅ Gestion des SKUs
+- ✅ API CRUD complète
+
+### EPIC-012: Stripe Payment Integration ✅
+- ✅ Intégration Stripe Checkout
+- ✅ Paiements sécurisés pour licences
+- ✅ Webhooks pour confirmation
+- ✅ Historique des paiements
+
+### 🎯 Nouvelles Features BMAD (Février 2026)
+- ✅ **Template Builder No-Code** - Création de templates sans code
+- ✅ **User Management Interface** - CRUD complet des utilisateurs
+- ✅ **Toast Notifications** - Système de notifications centralisé
+- ✅ **Advanced Search & Filters** - Recherche multi-critères
+- ✅ **Server-Side Pagination** - Performance optimisée
+- ✅ **JWT Authentication** - Tokens sécurisés avec bcrypt
 
 ## 📞 Contact
 
