@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page Utilisateurs</title>
+</head>
+<body>
+    <h1>Test de Redirection vers /users</h1>
+    <button onclick="testAuth()">1. Configurer Auth Admin</button>
+    <button onclick="goToUsers()">2. Aller sur /users</button>
+    <button onclick="checkAuth()">3. Vérifier Auth</button>
+    <div id="result"></div>
+
+    <script>
+        function testAuth() {
+            // Real JWT token generated with correct organizationId
+            const validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWFkbWluLWRlbW8iLCJvcmdhbml6YXRpb25JZCI6ImRlbW8tb3JnLTEiLCJyb2xlIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGphbnVzLWRlbW8uY29tIiwibmFtZSI6IkFkbWluIERlbW8iLCJpYXQiOjE3NzA0MjAyNzIsImV4cCI6MTc3MTAyNTA3Mn0.KVSgGo-r57gOVdy4yG9ixPtQw9KpM-ba_o-VxWkAFOY';
+
+            localStorage.setItem('jwt_token', validToken);
+            localStorage.setItem('user', JSON.stringify({
+                userId: 'user-admin-demo',
+                email: 'admin@janus-demo.com',
+                name: 'Admin Demo',
+                role: 'admin',
+                organizationId: 'demo-org-1'
+            }));
+            document.getElementById('result').innerHTML = '<p style="color:green">✅ Auth configurée avec un VRAI JWT token</p>';
+        }
+
+        function goToUsers() {
+            window.location.href = '/users';
+        }
+
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const token = localStorage.getItem('jwt_token');
+            document.getElementById('result').innerHTML = `
+                <pre>
+Token: ${token}
+User: ${JSON.stringify(user, null, 2)}
+                </pre>
+            `;
+        }
+    </script>
+</body>
+</html>

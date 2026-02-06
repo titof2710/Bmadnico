@@ -1,0 +1,27 @@
+{
+  "name": "janus-platform-demo",
+  "version": "1.0.0",
+  "description": "Janus Assessment Platform - Functional Demo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:test-portal\" \"npm run dev:manager\"",
+    "dev:backend": "npm run dev --workspace=@janus/backend",
+    "dev:test-portal": "npm run dev --workspace=@janus/test-portal",
+    "dev:manager": "npm run dev --workspace=@janus/manager",
+    "build": "npm run build --workspaces",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "setup": "npm install && npm run docker:up"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
