@@ -236,7 +236,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 async function loadPools() {
   try {
-    const response = await fetch(`${API_URL}/api/license-pools`);
+    const token = localStorage.getItem('jwt_token');
+    const response = await fetch(`${API_URL}/api/license-pools`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
     const data = await response.json();
     pools.value = data.pools || [];
   } catch (error) {
@@ -250,7 +255,12 @@ async function loadOrders() {
   ordersError.value = null;
 
   try {
-    const response = await fetch(`${API_URL}/api/payments/orders?organizationId=${organizationId.value}`);
+    const token = localStorage.getItem('jwt_token');
+    const response = await fetch(`${API_URL}/api/payments/orders?organizationId=${organizationId.value}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -284,11 +294,15 @@ async function saveThreshold() {
   savingThreshold.value = true;
 
   try {
+    const token = localStorage.getItem('jwt_token');
     const response = await fetch(
       `${API_URL}/api/license-pools/${selectedPool.value.poolId}/threshold`,
       {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ threshold: newThreshold.value }),
       }
     );
