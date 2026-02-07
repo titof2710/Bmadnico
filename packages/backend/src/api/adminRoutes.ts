@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getProjectionStore, getEventStore } from '../infrastructure/database.js';
+import { getProjectionStore, getEventStore, getLicensePoolProjectionStore } from '../infrastructure/database.js';
 
 const router = Router();
 
@@ -311,13 +311,13 @@ router.get('/license-consumption', async (req: Request, res: Response) => {
  */
 router.get('/license-pools', async (req: Request, res: Response) => {
   try {
-    const projectionStore = getProjectionStore();
+    const licensePoolStore = getLicensePoolProjectionStore();
 
     // Query parameter pour filtrage
     const { organizationId } = req.query;
 
     // Récupérer tous les pools globalement
-    let pools = await projectionStore.getAllPoolsGlobal();
+    let pools = await licensePoolStore.getAllPoolsGlobal();
 
     // Filtrer par organisation si spécifié
     if (organizationId) {
@@ -382,16 +382,16 @@ router.post('/license-pools', async (req: Request, res: Response) => {
     };
 
     const eventStore = getEventStore();
-    const projectionStore = getProjectionStore();
+    const licensePoolStore = getLicensePoolProjectionStore();
 
     // Enregistrer l'événement
     await eventStore.append(event);
 
     // Créer la projection
-    await projectionStore.createProjection(poolId, event);
+    await licensePoolStore.createProjection(poolId, event);
 
     // Récupérer le pool créé
-    const createdPool = await projectionStore.getPool(poolId, organizationId);
+    const createdPool = await licensePoolStore.getPool(poolId, organizationId);
 
     res.status(201).json({
       pool: createdPool,
@@ -427,8 +427,8 @@ router.put('/license-pools/:poolId/add-licenses', async (req: Request, res: Resp
       });
     }
 
-    const projectionStore = getProjectionStore();
-    const pool = await projectionStore.getPool(poolId, organizationId);
+    const licensePoolStore = getLicensePoolProjectionStore();
+    const pool = await licensePoolStore.getPool(poolId, organizationId);
 
     if (!pool) {
       return res.status(404).json({
@@ -457,9 +457,9 @@ router.put('/license-pools/:poolId/add-licenses', async (req: Request, res: Resp
 
     const eventStore = getEventStore();
     await eventStore.append(event);
-    await projectionStore.applyEvent(event);
+    await licensePoolStore.applyEvent(event);
 
-    const updatedPool = await projectionStore.getPool(poolId, organizationId);
+    const updatedPool = await licensePoolStore.getPool(poolId, organizationId);
 
     res.json({
       pool: updatedPool,
@@ -495,8 +495,8 @@ router.put('/license-pools/:poolId/update-threshold', async (req: Request, res: 
       });
     }
 
-    const projectionStore = getProjectionStore();
-    const pool = await projectionStore.getPool(poolId, organizationId);
+    const licensePoolStore = getLicensePoolProjectionStore();
+    const pool = await licensePoolStore.getPool(poolId, organizationId);
 
     if (!pool) {
       return res.status(404).json({
@@ -523,9 +523,9 @@ router.put('/license-pools/:poolId/update-threshold', async (req: Request, res: 
 
     const eventStore = getEventStore();
     await eventStore.append(event);
-    await projectionStore.applyEvent(event);
+    await licensePoolStore.applyEvent(event);
 
-    const updatedPool = await projectionStore.getPool(poolId, organizationId);
+    const updatedPool = await licensePoolStore.getPool(poolId, organizationId);
 
     res.json({
       pool: updatedPool,
@@ -554,8 +554,8 @@ router.delete('/license-pools/:poolId', async (req: Request, res: Response) => {
       });
     }
 
-    const projectionStore = getProjectionStore();
-    const pool = await projectionStore.getPool(poolId, organizationId);
+    const licensePoolStore = getLicensePoolProjectionStore();
+    const pool = await licensePoolStore.getPool(poolId, organizationId);
 
     if (!pool) {
       return res.status(404).json({
@@ -592,7 +592,7 @@ router.delete('/license-pools/:poolId', async (req: Request, res: Response) => {
     await eventStore.append(event);
 
     // Soft delete: marquer comme deleted dans projection
-    await projectionStore.markAsDeleted(poolId, organizationId);
+    await licensePoolStore.markAsDeleted(poolId, organizationId);
 
     res.json({
       message: 'License pool deleted successfully',
