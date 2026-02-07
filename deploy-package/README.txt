@@ -1,77 +1,134 @@
-╔══════════════════════════════════════════════════════════╗
-║   Janus Platform - Package de Déploiement Plesk         ║
-║   100% Interface Graphique - AUCUNE Commande SSH        ║
-╚══════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════╗
+║   Janus Platform - Package de Déploiement Plesk                 ║
+║   100% Interface Graphique - AUCUNE Commande SSH                ║
+╚══════════════════════════════════════════════════════════════════╝
 
-📦 CONTENU DU PACKAGE:
+📦 CONTENU DE CE PACKAGE:
 
-  api/              → Backend Node.js API (déjà compilé)
-  manager/          → Dashboard Manager (fichiers statiques HTML/CSS/JS)
-  portal/           → Test Portal (fichiers statiques HTML/CSS/JS)
-  seed-via-web.php  → Script pour créer les utilisateurs via navigateur
+  api/              → Backend Node.js (déjà compilé)
+  manager/          → Dashboard Manager (fichiers statiques)
+  portal/           → Test Portal (fichiers statiques)
 
-📖 DOCUMENTATION COMPLÈTE:
+⚠️  IMPORTANT: Ne PAS uploader ce package tel quel!
+    Chaque dossier va dans SON sous-domaine séparé.
 
-  DEPLOIEMENT-PLESK-SANS-SSH.md (dans ce dossier)
+═══════════════════════════════════════════════════════════════════
 
-🚀 QUICK START (15 Minutes):
+🚀 DÉPLOIEMENT EN 3 ÉTAPES SIMPLES:
 
-1️⃣  CRÉER LES SOUS-DOMAINES dans Plesk:
-   → api.janus.tondomaine.com
-   → manager.janus.tondomaine.com
-   → portal.janus.tondomaine.com
+═══════════════════════════════════════════════════════════════════
 
-2️⃣  ACTIVER SSL (Let's Encrypt) pour chaque sous-domaine
+ÉTAPE 1️⃣  - CRÉER 3 SOUS-DOMAINES DANS PLESK
+────────────────────────────────────────────────────────────
 
-3️⃣  ACTIVER NODE.JS pour api.janus.tondomaine.com:
-   - Version: 20.x
-   - Mode: Production
-   - Startup file: index.js
+Plesk → Domaines → "Ajouter un sous-domaine" (3 fois)
 
-4️⃣  UPLOAD LES FICHIERS via Plesk File Manager:
-   - Contenu de api/ → dans le dossier janus-api/
-   - Contenu de manager/ → dans le dossier janus-manager/
-   - Contenu de portal/ → dans le dossier janus-portal/
+  Sous-domaine: api      → Dossier: api
+  Sous-domaine: manager  → Dossier: manager
+  Sous-domaine: portal   → Dossier: portal
 
-5️⃣  CONFIGURER LES VARIABLES D'ENVIRONNEMENT:
-   - Plesk → api.janus.tondomaine.com → Node.js
-   - Ajoute les variables depuis api/.env.example
-   - Remplace les valeurs par tes vraies infos
+Pour CHAQUE sous-domaine:
+  ✓ Active SSL (Let's Encrypt)
+  ✓ Active redirection HTTP → HTTPS
 
-6️⃣  INSTALLER LES DÉPENDANCES:
-   - Plesk → Node.js → "Installer les dépendances"
-   - Attend la fin de l'installation
+═══════════════════════════════════════════════════════════════════
 
-7️⃣  CONFIGURER NGINX REVERSE PROXY:
-   - Voir le guide DEPLOIEMENT-PLESK-SANS-SSH.md section 4
+ÉTAPE 2️⃣  - UPLOAD LES FICHIERS (File Manager Plesk)
+────────────────────────────────────────────────────────────
 
-8️⃣  MONGODB (Cloud Atlas - Gratuit):
-   - Crée un compte sur https://www.mongodb.com/cloud/atlas
-   - Crée un cluster M0 (gratuit)
-   - Copie la connection string
-   - Ajoute-la dans les variables Node.js
+Décompresse ce ZIP quelque part, puis:
 
-9️⃣  SEED LES UTILISATEURS:
-   - Ouvre: https://api.janus.tondomaine.com/seed-via-web.php
-   - Clique "Seed Users"
-   - SUPPRIME le fichier seed-via-web.php après
+  📁 Dossier du sous-domaine "api"
+     → Upload TOUT le contenu du dossier api/
+        (index.js, package.json, tous les dossiers...)
 
-🔟  CONNEXION:
-   - URL: https://manager.janus.tondomaine.com
-   - Email: admin@janus-demo.com
-   - Password: admin123
+  📁 Dossier du sous-domaine "manager"
+     → Upload TOUT le contenu du dossier manager/
+        (index.html, assets/, test-users.html)
 
-✅ C'EST TOUT! Aucune commande SSH nécessaire!
+  📁 Dossier du sous-domaine "portal"
+     → Upload TOUT le contenu du dossier portal/
+        (index.html, assets/)
 
-═══════════════════════════════════════════════════════════
+⚠️  NE PAS uploader les dossiers api/, manager/, portal/ eux-mêmes!
+    Seulement LEUR CONTENU!
 
-📞 SUPPORT:
+═══════════════════════════════════════════════════════════════════
 
-  Si problème, vérifie:
-  - Plesk → Node.js → Logs (pour erreurs API)
-  - Navigateur F12 → Console (pour erreurs frontend)
-  - Guide complet: DEPLOIEMENT-PLESK-SANS-SSH.md
+ÉTAPE 3️⃣  - CONFIGURATION (Via Interface Plesk)
+────────────────────────────────────────────────────────────
 
-═══════════════════════════════════════════════════════════
+A) Pour l'API (api.tondomaine.com):
 
-🎉 Ton application Janus Platform sera en production!
+   1. Plesk → api.tondomaine.com → Node.js
+      • Active Node.js 20.x
+      • Mode: Production
+      • Startup file: index.js
+
+   2. Variables d'environnement (clic "Add variable"):
+      NODE_ENV = production
+      PORT = 3000
+      MONGODB_URI = mongodb+srv://user:pass@cluster.mongodb.net/janus-platform
+      JWT_SECRET = (génère 32 caractères aléatoires)
+      FRONTEND_MANAGER_URL = https://manager.tondomaine.com
+      FRONTEND_PORTAL_URL = https://portal.tondomaine.com
+
+   3. Nginx Settings → Additional directives:
+      location / {
+          proxy_pass http://127.0.0.1:3000;
+          proxy_http_version 1.1;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+
+B) Pour Manager et Portal:
+
+   Nginx Settings → Additional directives:
+   location / {
+       try_files $uri $uri/ /index.html;
+   }
+
+═══════════════════════════════════════════════════════════════════
+
+📖 GUIDES COMPLETS DISPONIBLES:
+
+   • DEPLOIEMENT-PLESK-SANS-SSH.md  → Guide détaillé complet
+   • (Dans GitHub) GUIDE-SIMPLE-PLESK.md  → Version ultra-simple
+
+═══════════════════════════════════════════════════════════════════
+
+🗄️  MONGODB (OBLIGATOIRE):
+
+   Va sur: https://www.mongodb.com/cloud/atlas
+   → Crée un cluster M0 GRATUIT
+   → Copie la connection string
+   → Ajoute-la dans les variables Node.js (MONGODB_URI)
+
+═══════════════════════════════════════════════════════════════════
+
+🌱 CRÉER LES UTILISATEURS:
+
+   1. Ouvre: https://api.tondomaine.com/seed-via-web.php
+   2. Clique "Seed Users"
+   3. SUPPRIME le fichier seed-via-web.php (sécurité!)
+
+═══════════════════════════════════════════════════════════════════
+
+✅ TEST FINAL:
+
+   Ouvre: https://manager.tondomaine.com
+   Email: admin@janus-demo.com
+   Password: admin123
+
+   🎉 Si tu vois le dashboard → C'EST BON!
+
+═══════════════════════════════════════════════════════════════════
+
+🆘 PROBLÈME?
+
+   • 502 Bad Gateway → Plesk → Node.js → Restart App
+   • CORS Error → Vérifie les URLs dans les variables (FRONTEND_...)
+   • Page blanche → F12 → Console → Regarde les erreurs
+
+═══════════════════════════════════════════════════════════════════
