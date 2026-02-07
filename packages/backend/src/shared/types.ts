@@ -28,7 +28,8 @@ export type DomainEventType =
   | 'LicensesAdded'
   | 'LicenseConsumed'
   | 'LicenseReleased'
-  | 'WarningThresholdUpdated';
+  | 'WarningThresholdUpdated'
+  | 'LicensePoolDeleted';
 
 export interface BaseDomainEvent {
   eventId: string;
@@ -252,6 +253,14 @@ export interface WarningThresholdUpdatedEvent extends BaseDomainEvent {
   };
 }
 
+export interface LicensePoolDeletedEvent extends BaseDomainEvent {
+  eventType: 'LicensePoolDeleted';
+  aggregateType: 'LicensePool';
+  payload: {
+    reason: string;
+  };
+}
+
 export type DomainEvent =
   | SessionCreatedEvent
   | SessionStartedEvent
@@ -273,7 +282,8 @@ export type DomainEvent =
   | LicensesAddedEvent
   | LicenseConsumedEvent
   | LicenseReleasedEvent
-  | WarningThresholdUpdatedEvent;
+  | WarningThresholdUpdatedEvent
+  | LicensePoolDeletedEvent;
 
 // ============================================================================
 // Projections (Read Models)

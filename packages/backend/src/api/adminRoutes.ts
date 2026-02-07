@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { getProjectionStore, getEventStore } from '../infrastructure/database.js';
+import { requireAdmin } from '../middleware/rbac.js';
 
 const router = Router();
 
@@ -302,6 +303,305 @@ router.get('/license-consumption', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Get license consumption error:', error);
     res.status(500).json({ error: 'Failed to get license consumption data' });
+  }
+});
+
+/**
+ * GET /api/admin/license-pools
+ * Récupère tous les pools de toutes les organisations (admin global)
+ */
+router.get('/license-pools', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const projectionStore = getProjectionStore();
+
+    // Query parameter pour filtrage
+    const { organizationId } = req.query;
+
+    // Récupérer tous les pools globalement
+    let pools = await projectionStore.getAllPoolsGlobal();
+
+    // Filtrer par organisation si spécifié
+    if (organizationId) {
+      pools = pools.filter(p => p.organizationId === organizationId);
+    }
+
+    res.json({
+      pools,
+      total: pools.length,
+    });
+  } catch (error) {
+    console.error('Get admin license pools error:', error);
+    res.status(500).json({ error: 'Failed to get admin license pools' });
+  }
+});
+
+/**
+ * POST /api/admin/license-pools
+ * Créer un nouveau pool pour une organisation spécifiée
+ */
+router.post('/license-pools', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { organizationId, productId, productName, initialLicenses, warningThreshold } = req.body;
+
+    // Validation
+    if (!organizationId || !productId || !productName || initialLicenses === undefined) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        message: 'organizationId, productId, productName, and initialLicenses are required',
+      });
+    }
+
+    if (initialLicenses < 1) {
+      return res.status(400).json({
+        error: 'Invalid initialLicenses',
+        message: 'initialLicenses must be greater than 0',
+      });
+    }
+
+    // Générer poolId unique
+    const poolId = `pool-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Calculer warningThreshold si non fourni (défaut: 20% du total)
+    const threshold = warningThreshold !== undefined ? warningThreshold : Math.floor(initialLicenses * 0.2);
+
+    // Créer événement LicensePoolCreated
+    const { v4: uuidv4 } = await import('uuid');
+    const event = {
+      eventId: uuidv4(),
+      eventType: 'LicensePoolCreated' as const,
+      aggregateId: poolId,
+      aggregateType: 'LicensePool' as const,
+      organizationId,
+      version: 1,
+      timestamp: new Date(),
+      payload: {
+        productId,
+        productName,
+        initialLicenses,
+        warningThreshold: threshold,
+      },
+    };
+
+    const eventStore = getEventStore();
+    const projectionStore = getProjectionStore();
+
+    // Enregistrer l'événement
+    await eventStore.append(event);
+
+    // Créer la projection
+    await projectionStore.createProjection(poolId, event);
+
+    // Récupérer le pool créé
+    const createdPool = await projectionStore.getPool(poolId, organizationId);
+
+    res.status(201).json({
+      pool: createdPool,
+      message: 'License pool created successfully',
+    });
+  } catch (error) {
+    console.error('Create admin license pool error:', error);
+    res.status(500).json({ error: 'Failed to create license pool' });
+  }
+});
+
+/**
+ * PUT /api/admin/license-pools/:poolId/add-licenses
+ * Ajouter des licences à un pool (admin global)
+ */
+router.put('/license-pools/:poolId/add-licenses', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { poolId } = req.params;
+    const { organizationId, quantity } = req.body;
+
+    // Validation
+    if (!organizationId) {
+      return res.status(400).json({
+        error: 'Missing organizationId',
+        message: 'organizationId is required',
+      });
+    }
+
+    if (!quantity || quantity <= 0) {
+      return res.status(400).json({
+        error: 'Invalid quantity',
+        message: 'quantity must be greater than 0',
+      });
+    }
+
+    const projectionStore = getProjectionStore();
+    const pool = await projectionStore.getPool(poolId, organizationId);
+
+    if (!pool) {
+      return res.status(404).json({
+        error: 'Pool not found',
+        message: `Pool ${poolId} not found for organization ${organizationId}`,
+      });
+    }
+
+    // Créer événement LicensesAdded
+    const { v4: uuidv4 } = await import('uuid');
+    const event = {
+      eventId: uuidv4(),
+      eventType: 'LicensesAdded' as const,
+      aggregateId: poolId,
+      aggregateType: 'LicensePool' as const,
+      organizationId,
+      version: pool.version + 1,
+      timestamp: new Date(),
+      payload: {
+        quantity,
+        orderId: `admin-add-${Date.now()}`,
+        previousTotal: pool.totalPurchased,
+        newTotal: pool.totalPurchased + quantity,
+      },
+    };
+
+    const eventStore = getEventStore();
+    await eventStore.append(event);
+    await projectionStore.applyEvent(event);
+
+    const updatedPool = await projectionStore.getPool(poolId, organizationId);
+
+    res.json({
+      pool: updatedPool,
+      message: 'Licenses added successfully',
+    });
+  } catch (error) {
+    console.error('Add licenses (admin) error:', error);
+    res.status(500).json({ error: 'Failed to add licenses' });
+  }
+});
+
+/**
+ * PUT /api/admin/license-pools/:poolId/update-threshold
+ * Mettre à jour le seuil d'alerte d'un pool
+ */
+router.put('/license-pools/:poolId/update-threshold', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { poolId } = req.params;
+    const { organizationId, newThreshold } = req.body;
+
+    // Validation
+    if (!organizationId) {
+      return res.status(400).json({
+        error: 'Missing organizationId',
+        message: 'organizationId is required',
+      });
+    }
+
+    if (newThreshold === undefined || newThreshold < 0) {
+      return res.status(400).json({
+        error: 'Invalid newThreshold',
+        message: 'newThreshold must be >= 0',
+      });
+    }
+
+    const projectionStore = getProjectionStore();
+    const pool = await projectionStore.getPool(poolId, organizationId);
+
+    if (!pool) {
+      return res.status(404).json({
+        error: 'Pool not found',
+        message: `Pool ${poolId} not found for organization ${organizationId}`,
+      });
+    }
+
+    // Créer événement WarningThresholdUpdated
+    const { v4: uuidv4 } = await import('uuid');
+    const event = {
+      eventId: uuidv4(),
+      eventType: 'WarningThresholdUpdated' as const,
+      aggregateId: poolId,
+      aggregateType: 'LicensePool' as const,
+      organizationId,
+      version: pool.version + 1,
+      timestamp: new Date(),
+      payload: {
+        previousThreshold: pool.warningThreshold,
+        newThreshold,
+      },
+    };
+
+    const eventStore = getEventStore();
+    await eventStore.append(event);
+    await projectionStore.applyEvent(event);
+
+    const updatedPool = await projectionStore.getPool(poolId, organizationId);
+
+    res.json({
+      pool: updatedPool,
+      message: 'Warning threshold updated successfully',
+    });
+  } catch (error) {
+    console.error('Update warning threshold (admin) error:', error);
+    res.status(500).json({ error: 'Failed to update warning threshold' });
+  }
+});
+
+/**
+ * DELETE /api/admin/license-pools/:poolId
+ * Supprimer un pool (soft delete uniquement)
+ */
+router.delete('/license-pools/:poolId', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { poolId } = req.params;
+    const { organizationId } = req.body;
+
+    // Validation
+    if (!organizationId) {
+      return res.status(400).json({
+        error: 'Missing organizationId',
+        message: 'organizationId is required in request body',
+      });
+    }
+
+    const projectionStore = getProjectionStore();
+    const pool = await projectionStore.getPool(poolId, organizationId);
+
+    if (!pool) {
+      return res.status(404).json({
+        error: 'Pool not found',
+        message: `Pool ${poolId} not found for organization ${organizationId}`,
+      });
+    }
+
+    // Vérifier si des licences sont consommées
+    if (pool.consumedLicenses > 0) {
+      return res.status(400).json({
+        error: 'Cannot delete pool with consumed licenses',
+        message: 'Please wait for all licenses to be released before deleting this pool',
+        consumedLicenses: pool.consumedLicenses,
+      });
+    }
+
+    // Créer événement LicensePoolDeleted
+    const { v4: uuidv4 } = await import('uuid');
+    const event = {
+      eventId: uuidv4(),
+      eventType: 'LicensePoolDeleted' as const,
+      aggregateId: poolId,
+      aggregateType: 'LicensePool' as const,
+      organizationId,
+      version: pool.version + 1,
+      timestamp: new Date(),
+      payload: {
+        reason: 'Admin deletion',
+      },
+    };
+
+    const eventStore = getEventStore();
+    await eventStore.append(event);
+
+    // Soft delete: marquer comme deleted dans projection
+    await projectionStore.markAsDeleted(poolId, organizationId);
+
+    res.json({
+      message: 'License pool deleted successfully',
+      poolId,
+    });
+  } catch (error) {
+    console.error('Delete license pool error:', error);
+    res.status(500).json({ error: 'Failed to delete license pool' });
   }
 });
 

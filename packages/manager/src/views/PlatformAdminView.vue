@@ -69,6 +69,17 @@
               >
                 🏢 Entreprises
               </button>
+              <button
+                @click="activeTab = 'license-pools'"
+                :class="[
+                  'py-4 px-6 text-center border-b-2 font-medium text-sm',
+                  activeTab === 'license-pools'
+                    ? 'border-primary-600 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ]"
+              >
+                🎫 Pools de Licences
+              </button>
             </nav>
           </div>
 
@@ -93,6 +104,11 @@
             <div v-if="activeTab === 'companies'">
               <CompaniesManagement :companies="companies" @refresh="loadCompanies" />
             </div>
+
+            <!-- License Pools Tab -->
+            <div v-if="activeTab === 'license-pools'">
+              <AdminLicensePoolsTable />
+            </div>
           </div>
         </div>
     </div>
@@ -108,6 +124,7 @@ import CompaniesManagement from '../components/CompaniesManagement.vue';
 import GlobalKPIsCards from '../components/GlobalKPIsCards.vue';
 import RevenueTrendChart from '../components/RevenueTrendChart.vue';
 import UserMenu from '../components/UserMenu.vue';
+import AdminLicensePoolsTable from '../components/AdminLicensePoolsTable.vue';
 
 const loading = ref(true);
 const activeTab = ref('assessments');

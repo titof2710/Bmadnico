@@ -21,6 +21,8 @@ export interface LicensePoolProjection {
   createdAt: Date;
   updatedAt: Date;
   version: number;
+  isDeleted?: boolean; // Soft delete flag
+  deletedAt?: Date; // Deletion timestamp
 }
 
 interface LicensePoolProjectionDocument extends LicensePoolProjection {
@@ -81,6 +83,33 @@ export class LicensePoolProjectionStore {
     const result = docs.map(({ _id, ...projection }) => projection);
     console.log('[LicensePoolProjectionStore] Returning', result.length, 'pools');
     return result;
+  }
+
+  /**
+   * Get all pools globally (admin use only)
+   */
+  async getAllPoolsGlobal(): Promise<LicensePoolProjection[]> {
+    const docs = await this.collection
+      .find({ isDeleted: { $ne: true } }) // Exclude deleted pools
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return docs.map(({ _id, ...projection }) => projection);
+  }
+
+  /**
+   * Mark a pool as deleted (soft delete)
+   */
+  async markAsDeleted(poolId: string, organizationId: string): Promise<void> {
+    await this.collection.updateOne(
+      { poolId, organizationId },
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: new Date(),
+        },
+      }
+    );
   }
 
   /**
