@@ -9,8 +9,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const MONGO_URI = 'mongodb://localhost:27017?directConnection=true';
-const DB_NAME = 'janus';
+const dotenv_1 = __importDefault(require("dotenv"));
+// Load environment variables
+dotenv_1.default.config();
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017?directConnection=true';
+const DB_NAME = process.env.MONGODB_DB_NAME || 'janus';
 async function seedUsers() {
     const client = new mongodb_1.MongoClient(MONGO_URI);
     try {

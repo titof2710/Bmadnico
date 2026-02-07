@@ -1,8 +1,14 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongodb_1 = require("mongodb");
-const MONGO_URI = 'mongodb://localhost:27017?directConnection=true';
-const DB_NAME = 'janus';
+const dotenv_1 = __importDefault(require("dotenv"));
+// Load environment variables
+dotenv_1.default.config();
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017?directConnection=true';
+const DB_NAME = process.env.MONGODB_DB_NAME || 'janus';
 async function seedDemoData() {
     console.log('🌱 Seeding demo data...\n');
     const client = new mongodb_1.MongoClient(MONGO_URI);

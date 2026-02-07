@@ -17,8 +17,8 @@ const DEMO_USERS = [
         password: 'admin123', // Plain text for DEMO only!
         name: 'Pierre Administrateur',
         role: 'admin',
-        organizationId: 'platform-root',
-        organizationName: 'Janus Platform',
+        organizationId: 'demo-org-1',
+        organizationName: 'Acme Corporation',
     },
     {
         id: 'manager-001',
@@ -26,8 +26,8 @@ const DEMO_USERS = [
         password: 'manager123',
         name: 'Sophie Gestionnaire',
         role: 'manager',
-        organizationId: 'org-acme-001',
-        organizationName: 'ACME Corporation',
+        organizationId: 'demo-org-1',
+        organizationName: 'Acme Corporation',
     },
     {
         id: 'manager-002',
@@ -35,8 +35,8 @@ const DEMO_USERS = [
         password: 'manager123',
         name: 'Marc Responsable',
         role: 'manager',
-        organizationId: 'org-techstart-001',
-        organizationName: 'TechStart SAS',
+        organizationId: 'demo-org-2',
+        organizationName: 'TechStart Solutions',
     },
     {
         id: 'participant-001',
@@ -44,8 +44,8 @@ const DEMO_USERS = [
         password: 'participant123',
         name: 'Julie Candidate',
         role: 'participant',
-        organizationId: 'org-acme-001',
-        organizationName: 'ACME Corporation',
+        organizationId: 'demo-org-1',
+        organizationName: 'Acme Corporation',
     },
     {
         id: 'participant-002',
@@ -53,8 +53,8 @@ const DEMO_USERS = [
         password: 'participant123',
         name: 'Jean Dupont',
         role: 'participant',
-        organizationId: 'org-techstart-001',
-        organizationName: 'TechStart SAS',
+        organizationId: 'demo-org-2',
+        organizationName: 'TechStart Solutions',
     },
 ];
 /**
