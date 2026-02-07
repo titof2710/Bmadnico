@@ -12,6 +12,10 @@
     "dev:test-portal": "npm run dev --workspace=@janus/test-portal",
     "dev:manager": "npm run dev --workspace=@janus/manager",
     "build": "npm run build --workspaces",
+    "build:backend": "npm run build --workspace=@janus/backend",
+    "build:manager": "npm run build --workspace=@janus/manager",
+    "build:portal": "npm run build --workspace=@janus/test-portal",
+    "start": "NODE_ENV=production node packages/backend/dist/index.js",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "setup": "npm install && npm run docker:up"
