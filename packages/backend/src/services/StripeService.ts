@@ -37,7 +37,7 @@ export class StripeService {
     // Enable demo mode if no valid API key is provided
     this.demoMode = !apiKey || apiKey === 'sk_test_dummy_key' || apiKey.length < 20;
 
-    if (this.demoMode) {
+    if (this.demoMode || !apiKey) {
       console.log('⚠️  Stripe running in DEMO MODE - No real payments will be processed');
       this.stripe = null;
     } else {
