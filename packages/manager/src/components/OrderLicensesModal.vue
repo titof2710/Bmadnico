@@ -234,6 +234,9 @@ const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const proceedToCheckout = async () => {
   if (!selectedProduct.value || !props.pool) {
     error.value = 'Veuillez sélectionner un produit';
@@ -244,7 +247,7 @@ const proceedToCheckout = async () => {
   error.value = null;
 
   try {
-    const response = await fetch('http://localhost:3000/api/payments/create-checkout-session', {
+    const response = await fetch(`${API_URL}/api/payments/create-checkout-session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -231,9 +231,12 @@ function closeNotification() {
   showNotification.value = false;
 }
 
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 async function loadPools() {
   try {
-    const response = await fetch('http://localhost:3000/api/license-pools');
+    const response = await fetch(`${API_URL}/api/license-pools`);
     const data = await response.json();
     pools.value = data.pools || [];
   } catch (error) {
@@ -247,7 +250,7 @@ async function loadOrders() {
   ordersError.value = null;
 
   try {
-    const response = await fetch(`http://localhost:3000/api/payments/orders?organizationId=${organizationId.value}`);
+    const response = await fetch(`${API_URL}/api/payments/orders?organizationId=${organizationId.value}`);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -282,7 +285,7 @@ async function saveThreshold() {
 
   try {
     const response = await fetch(
-      `http://localhost:3000/api/license-pools/${selectedPool.value.poolId}/threshold`,
+      `${API_URL}/api/license-pools/${selectedPool.value.poolId}/threshold`,
       {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

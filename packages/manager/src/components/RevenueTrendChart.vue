@@ -117,12 +117,15 @@ const chartOptions = computed(() => ({
   },
 }));
 
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const fetchRevenueTrend = async () => {
   loading.value = true;
   error.value = null;
 
   try {
-    const response = await fetch('http://localhost:3000/api/admin/revenue-trend');
+    const response = await fetch(`${API_URL}/api/admin/revenue-trend`);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);

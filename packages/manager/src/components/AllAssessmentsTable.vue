@@ -262,8 +262,11 @@ function closeDetailModal() {
   selectedSessionId.value = null;
 }
 
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 function downloadPDF(session: any) {
-  window.open(`http://localhost:3000/api/sessions/${session.sessionId}/pdf`, '_blank');
+  window.open(`${API_URL}/api/sessions/${session.sessionId}/pdf`, '_blank');
 }
 
 function viewResults(session: any) {

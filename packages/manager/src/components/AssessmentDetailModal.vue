@@ -154,15 +154,18 @@ const loadDetails = async () => {
   loading.value = true;
   error.value = null;
 
+  // API URL from environment variable
+  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
+
   try {
     // Load assessment details
-    const sessionResponse = await fetch(`http://localhost:3000/api/sessions?sessionId=${props.sessionId}`);
+    const sessionResponse = await fetch(`${API_URL}/api/sessions?sessionId=${props.sessionId}`);
     if (!sessionResponse.ok) throw new Error('Failed to load session');
     const sessionData = await sessionResponse.json();
     assessment.value = sessionData.sessions[0];
 
     // Load event history
-    const eventsResponse = await fetch(`http://localhost:3000/api/admin/audit-logs?sessionId=${props.sessionId}`);
+    const eventsResponse = await fetch(`${API_URL}/api/admin/audit-logs?sessionId=${props.sessionId}`);
     if (eventsResponse.ok) {
       const eventsData = await eventsResponse.json();
       events.value = eventsData.logs || [];
@@ -177,7 +180,7 @@ const loadDetails = async () => {
 
 const downloadPDF = async () => {
   try {
-    window.open(`http://localhost:3000/api/sessions/${props.sessionId}/pdf`, '_blank');
+    window.open(`${API_URL}/api/sessions/${props.sessionId}/pdf`, '_blank');
   } catch (err) {
     console.error('Failed to download PDF:', err);
     alert('Failed to download PDF report');
@@ -188,7 +191,7 @@ const suspendSession = async () => {
   if (!confirm('Are you sure you want to suspend this session?')) return;
 
   try {
-    const response = await fetch(`http://localhost:3000/api/sessions/${props.sessionId}/suspend`, {
+    const response = await fetch(`${API_URL}/api/sessions/${props.sessionId}/suspend`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reason: 'Suspended by admin' }),
@@ -209,7 +212,7 @@ const expireSession = async () => {
   if (!confirm('Are you sure you want to expire this session?')) return;
 
   try {
-    const response = await fetch(`http://localhost:3000/api/sessions/expire-old`, {
+    const response = await fetch(`${API_URL}/api/sessions/expire-old`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionIds: [props.sessionId] }),

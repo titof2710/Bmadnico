@@ -152,11 +152,14 @@ onMounted(async () => {
 });
 
 async function loadResults() {
+  // API URL from environment variable
+  const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
+
   try {
     loading.value = true;
     error.value = null;
 
-    const response = await fetch(`http://localhost:3000/api/sessions/${sessionId}/results`);
+    const response = await fetch(`${API_URL}/api/sessions/${sessionId}/results`);
 
     if (!response.ok) {
       const data = await response.json();
@@ -185,7 +188,7 @@ function formatDate(dateString?: string): string {
 
 async function downloadReport() {
   try {
-    const response = await fetch(`http://localhost:3000/api/sessions/${sessionId}/pdf`);
+    const response = await fetch(`${API_URL}/api/sessions/${sessionId}/pdf`);
 
     if (!response.ok) {
       alert('❌ Erreur lors de la génération du PDF');

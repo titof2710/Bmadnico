@@ -135,9 +135,12 @@ onMounted(async () => {
   loading.value = false;
 });
 
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
+
 async function loadKPIs() {
   try {
-    const response = await fetch('http://localhost:3000/api/admin/kpis');
+    const response = await fetch(`${API_URL}/api/admin/kpis`);
     const data = await response.json();
     kpis.value = data.kpis;
   } catch (error) {
@@ -147,7 +150,7 @@ async function loadKPIs() {
 
 async function loadAllAssessments() {
   try {
-    const response = await fetch('http://localhost:3000/api/admin/assessments');
+    const response = await fetch('${API_URL}/api/admin/assessments');
     const data = await response.json();
     allSessions.value = data.sessions;
   } catch (error) {
@@ -157,7 +160,7 @@ async function loadAllAssessments() {
 
 async function loadAuditLogs() {
   try {
-    const response = await fetch('http://localhost:3000/api/admin/audit-logs');
+    const response = await fetch('${API_URL}/api/admin/audit-logs');
     const data = await response.json();
     auditLogs.value = data.logs;
   } catch (error) {
@@ -167,7 +170,7 @@ async function loadAuditLogs() {
 
 async function loadMetaTemplates() {
   try {
-    const response = await fetch('http://localhost:3000/api/admin/meta-templates');
+    const response = await fetch('${API_URL}/api/admin/meta-templates');
     const data = await response.json();
     metaTemplates.value = data.templates;
   } catch (error) {
@@ -177,7 +180,7 @@ async function loadMetaTemplates() {
 
 async function loadCompanies() {
   try {
-    const response = await fetch('http://localhost:3000/api/companies');
+    const response = await fetch('${API_URL}/api/companies');
     const data = await response.json();
     companies.value = data.companies;
   } catch (error) {

@@ -91,12 +91,15 @@ const kpis = ref<KPIs>({
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const fetchKPIs = async () => {
   loading.value = true;
   error.value = null;
 
   try {
-    const response = await fetch('http://localhost:3000/api/admin/kpis');
+    const response = await fetch(`${API_URL}/api/admin/kpis`);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);

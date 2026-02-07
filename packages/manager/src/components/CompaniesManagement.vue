@@ -254,11 +254,14 @@ const newUser = ref({
   role: 'consultant' as 'representative' | 'consultant',
 });
 
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || '${API_URL}';
+
 async function createCompany() {
   try {
     creating.value = true;
 
-    const response = await fetch('http://localhost:3000/api/companies', {
+    const response = await fetch(`${API_URL}/api/companies`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newCompany.value),
@@ -300,7 +303,7 @@ async function addUser() {
 
   try {
     const response = await fetch(
-      `http://localhost:3000/api/companies/${selectedCompany.value.companyId}/users`,
+      `${API_URL}/api/companies/${selectedCompany.value.companyId}/users`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -320,7 +323,7 @@ async function addUser() {
 
     // Reload company details
     const companyResponse = await fetch(
-      `http://localhost:3000/api/companies/${selectedCompany.value.companyId}`
+      `${API_URL}/api/companies/${selectedCompany.value.companyId}`
     );
     selectedCompany.value = await companyResponse.json();
   } catch (error) {

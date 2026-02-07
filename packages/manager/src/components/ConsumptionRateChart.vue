@@ -224,6 +224,9 @@ const formatChartDate = (dateStr: string): string => {
   });
 };
 
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const fetchData = async () => {
   loading.value = true;
   error.value = null;
@@ -236,7 +239,7 @@ const fetchData = async () => {
     params.append('days', selectedPeriod.value.toString());
 
     const response = await fetch(
-      `http://localhost:3000/api/admin/license-consumption?${params.toString()}`
+      `${API_URL}/api/admin/license-consumption?${params.toString()}`
     );
 
     if (!response.ok) {

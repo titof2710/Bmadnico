@@ -68,10 +68,13 @@ const accounts = ref<DemoAccount[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+// API URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 // Fetch demo accounts on mount
 onMounted(async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/auth/demo-accounts');
+    const response = await fetch(`${API_URL}/api/auth/demo-accounts`);
     const data = await response.json();
     accounts.value = data.accounts;
   } catch (err) {
@@ -89,7 +92,7 @@ const loginWithAccount = async (account: DemoAccount) => {
     // Clear all previous cache before login
     localStorage.clear();
 
-    const response = await fetch('http://localhost:3000/api/auth/login', {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
