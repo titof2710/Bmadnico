@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import { getProjectionStore, getEventStore } from '../infrastructure/database.js';
-import { requireAdmin } from '../middleware/rbac.js';
 
 const router = Router();
 
@@ -310,7 +309,7 @@ router.get('/license-consumption', async (req: Request, res: Response) => {
  * GET /api/admin/license-pools
  * Récupère tous les pools de toutes les organisations (admin global)
  */
-router.get('/license-pools', requireAdmin, async (req: Request, res: Response) => {
+router.get('/license-pools', async (req: Request, res: Response) => {
   try {
     const projectionStore = getProjectionStore();
 
@@ -339,7 +338,7 @@ router.get('/license-pools', requireAdmin, async (req: Request, res: Response) =
  * POST /api/admin/license-pools
  * Créer un nouveau pool pour une organisation spécifiée
  */
-router.post('/license-pools', requireAdmin, async (req: Request, res: Response) => {
+router.post('/license-pools', async (req: Request, res: Response) => {
   try {
     const { organizationId, productId, productName, initialLicenses, warningThreshold } = req.body;
 
@@ -408,7 +407,7 @@ router.post('/license-pools', requireAdmin, async (req: Request, res: Response) 
  * PUT /api/admin/license-pools/:poolId/add-licenses
  * Ajouter des licences à un pool (admin global)
  */
-router.put('/license-pools/:poolId/add-licenses', requireAdmin, async (req: Request, res: Response) => {
+router.put('/license-pools/:poolId/add-licenses', async (req: Request, res: Response) => {
   try {
     const { poolId } = req.params;
     const { organizationId, quantity } = req.body;
@@ -476,7 +475,7 @@ router.put('/license-pools/:poolId/add-licenses', requireAdmin, async (req: Requ
  * PUT /api/admin/license-pools/:poolId/update-threshold
  * Mettre à jour le seuil d'alerte d'un pool
  */
-router.put('/license-pools/:poolId/update-threshold', requireAdmin, async (req: Request, res: Response) => {
+router.put('/license-pools/:poolId/update-threshold', async (req: Request, res: Response) => {
   try {
     const { poolId } = req.params;
     const { organizationId, newThreshold } = req.body;
@@ -542,7 +541,7 @@ router.put('/license-pools/:poolId/update-threshold', requireAdmin, async (req: 
  * DELETE /api/admin/license-pools/:poolId
  * Supprimer un pool (soft delete uniquement)
  */
-router.delete('/license-pools/:poolId', requireAdmin, async (req: Request, res: Response) => {
+router.delete('/license-pools/:poolId', async (req: Request, res: Response) => {
   try {
     const { poolId } = req.params;
     const { organizationId } = req.body;
