@@ -5,9 +5,13 @@
 
 import { MongoClient } from 'mongodb';
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
 
-const MONGO_URI = 'mongodb://localhost:27017?directConnection=true';
-const DB_NAME = 'janus';
+// Load environment variables
+dotenv.config();
+
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017?directConnection=true';
+const DB_NAME = process.env.MONGODB_DB_NAME || 'janus';
 
 async function seedUsers() {
   const client = new MongoClient(MONGO_URI);
