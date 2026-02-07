@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "seed": "tsx src/scripts/seed-demo-data.ts",
-    "seed:users": "tsx src/scripts/seed-users.ts"
+    "seed:users": "tsx src/scripts/seed-users.ts",
+    "migrate:pools": "tsx src/scripts/migrate-pools-to-projections.ts"
   },
   "dependencies": {
     "@types/nodemailer": "^7.0.9",

@@ -250,7 +250,25 @@ router.get('/license-consumption', async (req: Request, res: Response) => {
     const { poolId, organizationId, days = '30' } = req.query;
     const daysCount = parseInt(days as string, 10);
 
-    // Générer des données de démonstration pour la consommation de licences
+    // Données statiques de consommation (pattern réaliste sur 90 jours)
+    const staticPattern = [
+      5, 3, 7, 4, 6, 8, 5, 4, 9, 6, 7, 5, 8, 4, 6, // Semaine 1-2
+      7, 5, 8, 6, 9, 7, 4, 5, 8, 6, 7, 9, 5, 4, 6, // Semaine 3-4
+      8, 6, 7, 5, 9, 8, 6, 7, 5, 8, 6, 9, 7, 5, 4, // Semaine 5-6
+      6, 8, 7, 9, 5, 6, 8, 7, 5, 9, 6, 8, 7, 4, 5, // Semaine 7-8
+      7, 5, 8, 6, 9, 7, 5, 8, 6, 7, 9, 5, 6, 8, 7, // Semaine 9-10
+      5, 8, 6, 9, 7, 5, 8, 6, 7, 5, 9, 6, 8, 7, 5  // Semaine 11-12
+    ];
+
+    const staticReleased = [
+      2, 1, 3, 2, 2, 4, 2, 1, 3, 2, 3, 2, 4, 1, 2,
+      3, 2, 4, 2, 3, 3, 1, 2, 4, 2, 3, 4, 2, 1, 2,
+      4, 2, 3, 2, 4, 3, 2, 3, 2, 4, 2, 3, 3, 2, 1,
+      2, 4, 3, 4, 2, 2, 4, 3, 2, 3, 2, 4, 3, 1, 2,
+      3, 2, 4, 2, 3, 3, 2, 4, 2, 3, 4, 2, 2, 4, 3,
+      2, 4, 2, 3, 3, 2, 4, 2, 3, 2, 3, 2, 4, 3, 2
+    ];
+
     const consumption = [];
     const today = new Date();
 
@@ -258,9 +276,10 @@ router.get('/license-consumption', async (req: Request, res: Response) => {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
 
-      // Générer des données aléatoires mais réalistes
-      const consumed = Math.floor(Math.random() * 10) + 2; // 2-12 licences consommées
-      const released = Math.floor(Math.random() * 5); // 0-5 licences libérées
+      // Utiliser les données statiques (cyclique si plus de 90 jours)
+      const index = (90 - i - 1) % staticPattern.length;
+      const consumed = staticPattern[index] || 6;
+      const released = staticReleased[index] || 2;
 
       consumption.push({
         date: date.toISOString().split('T')[0],
