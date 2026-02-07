@@ -65,12 +65,22 @@ export class LicensePoolProjectionStore {
    * Get all pools for an organization
    */
   async getPools(organizationId: string): Promise<LicensePoolProjection[]> {
+    console.log('[LicensePoolProjectionStore] getPools called with organizationId:', organizationId);
+    console.log('[LicensePoolProjectionStore] Collection name:', this.collection.collectionName);
+
     const docs = await this.collection
       .find({ organizationId })
       .sort({ createdAt: -1 })
       .toArray();
 
-    return docs.map(({ _id, ...projection }) => projection);
+    console.log('[LicensePoolProjectionStore] Found', docs.length, 'documents');
+    if (docs.length > 0) {
+      console.log('[LicensePoolProjectionStore] Sample doc:', JSON.stringify(docs[0], null, 2));
+    }
+
+    const result = docs.map(({ _id, ...projection }) => projection);
+    console.log('[LicensePoolProjectionStore] Returning', result.length, 'pools');
+    return result;
   }
 
   /**

@@ -11,10 +11,22 @@ const router = Router();
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
+    console.log('========== GET /api/license-pools ==========');
+    console.log('Request headers:', req.headers.authorization ? 'Bearer token present' : 'NO TOKEN');
+    console.log('req.user:', req.user);
+    console.log('req.userId:', (req as any).userId);
+    console.log('req.organizationId:', (req as any).organizationId);
+    console.log('req.userRole:', (req as any).userRole);
+
     const organizationId = (req as any).organizationId;
+    console.log('Using organizationId for query:', organizationId);
+
     const licensePoolStore = getLicensePoolProjectionStore();
+    console.log('LicensePoolProjectionStore retrieved');
 
     const pools = await licensePoolStore.getPools(organizationId);
+    console.log('Pools found:', pools.length);
+    console.log('Pool details:', JSON.stringify(pools, null, 2));
 
     res.json({
       pools,

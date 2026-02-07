@@ -35,10 +35,14 @@ declare global {
  */
 export function authenticate(req: Request, res: Response, next: NextFunction) {
   try {
+    console.log('[AUTH] authenticate middleware called for:', req.method, req.path);
+
     // Extract token from Authorization header
     const authHeader = req.headers.authorization;
+    console.log('[AUTH] Authorization header:', authHeader ? 'Present (Bearer...)' : 'Missing');
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('[AUTH] FAILED: Missing or invalid Authorization header');
       return res.status(401).json({
         error: 'Unauthorized',
         message: 'Missing or invalid Authorization header'
@@ -50,6 +54,8 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 
     // Verify and decode JWT
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
+    console.log('[AUTH] Token decoded successfully');
+    console.log('[AUTH] User:', decoded.email, '| Role:', decoded.role, '| Org:', decoded.organizationId);
 
     // Inject user context into request
     req.user = decoded;
@@ -57,8 +63,11 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     req.organizationId = decoded.organizationId;
     req.userRole = decoded.role;
 
+    console.log('[AUTH] Request context injected successfully');
     next();
   } catch (error) {
+    console.log('[AUTH] ERROR:', error);
+
     if (error instanceof jwt.TokenExpiredError) {
       return res.status(401).json({
         error: 'TokenExpired',

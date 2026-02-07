@@ -16,9 +16,12 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
  */
 function authenticate(req, res, next) {
     try {
+        console.log('[AUTH] authenticate middleware called for:', req.method, req.path);
         // Extract token from Authorization header
         const authHeader = req.headers.authorization;
+        console.log('[AUTH] Authorization header:', authHeader ? 'Present (Bearer...)' : 'Missing');
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            console.log('[AUTH] FAILED: Missing or invalid Authorization header');
             return res.status(401).json({
                 error: 'Unauthorized',
                 message: 'Missing or invalid Authorization header'
@@ -28,14 +31,18 @@ function authenticate(req, res, next) {
         const jwtSecret = process.env.JWT_SECRET || 'demo-secret-change-in-production';
         // Verify and decode JWT
         const decoded = jsonwebtoken_1.default.verify(token, jwtSecret);
+        console.log('[AUTH] Token decoded successfully');
+        console.log('[AUTH] User:', decoded.email, '| Role:', decoded.role, '| Org:', decoded.organizationId);
         // Inject user context into request
         req.user = decoded;
         req.userId = decoded.sub;
         req.organizationId = decoded.organizationId;
         req.userRole = decoded.role;
+        console.log('[AUTH] Request context injected successfully');
         next();
     }
     catch (error) {
+        console.log('[AUTH] ERROR:', error);
         if (error instanceof jsonwebtoken_1.default.TokenExpiredError) {
             return res.status(401).json({
                 error: 'TokenExpired',

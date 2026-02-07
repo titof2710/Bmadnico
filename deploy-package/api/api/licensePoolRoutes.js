@@ -11,9 +11,19 @@ const router = (0, express_1.Router)();
  */
 router.get('/', async (req, res) => {
     try {
+        console.log('========== GET /api/license-pools ==========');
+        console.log('Request headers:', req.headers.authorization ? 'Bearer token present' : 'NO TOKEN');
+        console.log('req.user:', req.user);
+        console.log('req.userId:', req.userId);
+        console.log('req.organizationId:', req.organizationId);
+        console.log('req.userRole:', req.userRole);
         const organizationId = req.organizationId;
+        console.log('Using organizationId for query:', organizationId);
         const licensePoolStore = (0, database_js_1.getLicensePoolProjectionStore)();
+        console.log('LicensePoolProjectionStore retrieved');
         const pools = await licensePoolStore.getPools(organizationId);
+        console.log('Pools found:', pools.length);
+        console.log('Pool details:', JSON.stringify(pools, null, 2));
         res.json({
             pools,
             total: pools.length,
