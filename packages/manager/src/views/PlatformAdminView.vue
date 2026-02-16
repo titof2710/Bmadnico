@@ -153,7 +153,10 @@ onMounted(async () => {
 });
 
 // API URL from environment variable
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
+if (!API_URL) {
+  console.error('VITE_API_URL is not defined! Please set it in your environment variables.');
+}
 
 async function loadKPIs() {
   try {
